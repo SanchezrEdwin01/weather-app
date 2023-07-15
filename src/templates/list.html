@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>List</title>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+    <h1>Items List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>City</th>
+                <th>Temperature</th>
+                <th>Description</th>
+                <th>Humidity</th>
+                <!-- Otros campos -->
+            </tr>
+        </thead>
+        <tbody>
+            {{#each items}}
+            <tr>
+                <td>{{this.city}}</td>
+                <td>{{this.temperature}}</td>
+                <td>{{this.description}}</td>
+                <td>{{this.humidity}}</td>
+                <!-- Otros campos -->
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    <script src="/static/script.js"></script>
+</body>
+</html>
