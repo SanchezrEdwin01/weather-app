@@ -7,11 +7,14 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4.3.1"
+actix-rt = "2.3"
 diesel = { version = "2.1.0", features = ["postgres", "r2d2"] }
 dotenv = "0.15"
-chrono = "0.4"
-yew = "0.20.0"
+chrono = { version = "0.4", features = ["serde"] }
+yew = "0.17.0"
 tera = "1.19.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 yew-router = "0.17.0"
+tokio = { version = "1", features = ["full"] }
+yew-component = "0.1.0"

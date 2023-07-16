@@ -10,8 +10,7 @@ pub fn create_item(pool: &DbPool, item: &WeatherItem) -> Result<WeatherItem, Err
 
     let new_item = diesel::insert_into(weather)
         .values(item)
-        .get_result(&conn)?;
-
+        .get_result(&mut conn)?;
     Ok(new_item)
 }
 
@@ -42,7 +41,7 @@ pub fn update_item(pool: &DbPool, item_id: i32, updated_item: &WeatherItem) -> R
 
     let item = diesel::update(weather.find(item_id))
         .set(updated_item)
-        .get_result(&conn)?;
+        .get_result(&mut conn)?;
 
     Ok(item)
 }
@@ -52,7 +51,7 @@ pub fn delete_item(pool: &DbPool, item_id: i32) -> Result<usize, Error> {
 
     let conn = pool.get().expect("Failed to obtain database connection");
 
-    let deleted_rows = diesel::delete(weather.find(item_id)).execute(&conn)?;
+    let deleted_rows = diesel::delete(weather.find(item_id)).execute(&mut conn)?;
 
     Ok(deleted_rows)
 }

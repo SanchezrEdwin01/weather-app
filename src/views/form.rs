@@ -1,7 +1,7 @@
 use yew::prelude::*;
+use yew::html::{InputData};
 
 pub struct Form {
-    link: ComponentLink<Self>,
     city: String,
     temperature: f64,
     description: String,
@@ -20,9 +20,8 @@ impl Component for Form {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+    fn create(_: &Context<Self>) -> Self {
         Form {
-            link,
             city: String::new(),
             temperature: 0.0,
             description: String::new(),
@@ -30,7 +29,7 @@ impl Component for Form {
         }
     }
 
-    fn update(&mut self, msg: Self::Message) -> ShouldRender {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::UpdateCity(city) => self.city = city,
             Msg::UpdateTemperature(temperature) => {
@@ -54,20 +53,21 @@ impl Component for Form {
         true
     }
 
-    fn view(&self) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             // Vista del formulario
-            <form onsubmit=self.link.callback(|e: FocusEvent| {
+            <form onsubmit={|e: SubmitEvent| {
                     e.prevent_default();
-                    Msg::SubmitForm
-                })>
+                    Msg::SubmitForm;
+                    ()
+                }}>
                 <div>
                     <label for="city">{"City:"}</label>
                     <input
                         type="text"
                         id="city"
-                        value=&self.city
-                        oninput=self.link.callback(|e: InputData| Msg::UpdateCity(e.value))
+                        value={self.city.clone()}
+                        oninput={|e: InputData| Msg::UpdateCity(e.value)}
                         required=true
                     />
                 </div>
@@ -77,8 +77,8 @@ impl Component for Form {
                         type="number"
                         id="temperature"
                         step="0.01"
-                        value=&self.temperature.to_string()
-                        oninput=self.link.callback(|e: InputData| Msg::UpdateTemperature(e.value))
+                        value={self.temperature.to_string()}
+                        oninput={|e: InputData| Msg::UpdateTemperature(e.value)}
                         required=true
                     />
                 </div>
@@ -87,8 +87,8 @@ impl Component for Form {
                     <input
                         type="text"
                         id="description"
-                        value=&self.description
-                        oninput=self.link.callback(|e: InputData| Msg::UpdateDescription(e.value))
+                        value={self.description.clone()}
+                        oninput={|e: InputData| Msg::UpdateDescription(e.value)}
                         required=true
                     />
                 </div>
@@ -98,8 +98,8 @@ impl Component for Form {
                         type="number"
                         id="humidity"
                         step="0.01"
-                        value=&self.humidity.to_string()
-                        oninput=self.link.callback(|e: InputData| Msg::UpdateHumidity(e.value))
+                        value={self.humidity.to_string()}
+                        oninput={|e: InputData| Msg::UpdateHumidity(e.value)}
                         required=true
                     />
                 </div>

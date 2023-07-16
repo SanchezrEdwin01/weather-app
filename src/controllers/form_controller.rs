@@ -1,78 +1,57 @@
-use crate::services::item_service;
-use crate::database::DbPool;
-use crate::models::WeatherItem;
-use yew::prelude::*;
-use yew_router::agent::RouteRequest;
-use yew_router::prelude::*;
+#![recursion_limit = "1024"]
 
-pub struct FormController {
-    link: ComponentLink<Self>,
-    pool: DbPool,
-    router: RouteAgentDispatcher<()>,
-    item: WeatherItem,
+use yew::prelude::*;
+use yew::ComponentLink;
+
+pub struct Form {
+    link: ComponentLink<Form>,
+    city: String,
+    temperature: f64,
+    description: String,
+    humidity: f64,
 }
 
 pub enum Msg {
-    UpdateField(String, String),
-    SaveItem,
+    UpdateCity(String),
+    UpdateTemperature(String),
+    UpdateDescription(String),
+    UpdateHumidity(String),
+    SubmitForm,
 }
 
-impl Component for FormController {
+impl Component for Form {
     type Message = Msg;
     type Properties = ();
 
-    fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        // Inicializar el pool de la base de datos y otras configuraciones necesarias
-        let pool = crate::database::establish_connection();
-        let router = RouteAgentDispatcher::new();
-
-        FormController {
+    fn create(_: Self::Properties, link: ComponentLink<Self>) -> Self {
+        Form {
             link,
-            pool,
-            router,
-            item: WeatherItem {
-                id: 0,
-                city: String::new(),
-                temperature: 0.0,
-                description: String::new(),
-                humidity: 0.0,
-                wind: None,
-                visibility: None,
-                atmospheric_pressure: None,
-                sunrise: None,
-                sunset: None,
-                date_time: chrono::Utc::now(),
-            },
+            city: String::new(),
+            temperature: 0.0,
+            description: String::new(),
+            humidity: 0.0,
         }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::UpdateField(field, value) => {
-                // Actualizar el campo correspondiente en el item
-                match field.as_str() {
-                    "city" => self.item.city = value,
-                    "temperature" => {
-                        if let Ok(temperature) = value.parse::<f64>() {
-                            self.item.temperature = temperature;
-                        }
-                    }
-                    "description" => self.item.description = value,
-                    "humidity" => {
-                        if let Ok(humidity) = value.parse::<f64>() {
-                            self.item.humidity = humidity;
-                        }
-                    }
-                    // Actualizar otros campos si es necesario
-                    _ => {}
+            Msg::UpdateCity(city) => self.city = city,
+            Msg::UpdateTemperature(temperature) => {
+                if let Ok(temperature) = temperature.parse::<f64>() {
+                    self.temperature = temperature;
                 }
             }
-            Msg::SaveItem => {
-                // Guardar el item en la base de datos
-                if let Ok(new_item) = item_service::create_weather_item(&self.pool, &self.item) {
-                    // Navegar a la lista de elementos después de guardar el item
-                    self.router.send(RouteRequest::ChangeRoute(Route::from("/list")));
+            Msg::UpdateDescription(description) => self.description = description,
+            Msg::UpdateHumidity(humidity) => {
+                if let Ok(humidity) = humidity.parse::<f64>() {
+                    self.humidity = humidity;
                 }
+            }
+            Msg::SubmitForm => {
+                // Aquí puedes realizar las acciones necesarias con los datos del formulario
+                // Por ejemplo, enviar los datos al backend para crear un nuevo elemento
+                // o llamar a una función de controlador correspondiente
+                // ...
             }
         }
         true
@@ -81,44 +60,54 @@ impl Component for FormController {
     fn view(&self) -> Html {
         html! {
             // Vista del formulario
-            <form>
+            <form onsubmit=self.link.callback(|e: FocusEvent| {
+                    e.prevent_default();
+                    Msg::SubmitForm
+                })>
                 <div>
-                    <label>{"City:"}</label>
+                    <label for="city">{"City:"}</label>
                     <input
                         type="text"
-                        value=self.item.city.clone()
-                        oninput=self.link.callback(|e: InputData| Msg::UpdateField("city".to_owned(), e.value))
+                        id="city"
+                        value=&self.city
+                        oninput=self.link.callback(|e: InputData| Msg::UpdateCity(e.value))
+                        required=true
                     />
                 </div>
                 <div>
-                    <label>{"Temperature:"}</label>
+                    <label for="temperature">{"Temperature:"}</label>
                     <input
                         type="number"
+                        id="temperature"
                         step="0.01"
-                        value=self.item.temperature.to_string()
-                        oninput=self.link.callback(|e: InputData| Msg::UpdateField("temperature".to_owned(), e.value))
+                        value=&self.temperature.to_string()
+                        oninput=self.link.callback(|e: InputData| Msg::UpdateTemperature(e.value))
+                        required=true
                     />
                 </div>
                 <div>
-                    <label>{"Description:"}</label>
+                    <label for="description">{"Description:"}</label>
                     <input
                         type="text"
-                        value=self.item.description.clone()
-                        oninput=self.link.callback(|e: InputData| Msg::UpdateField("description".to_owned(), e.value))
+                        id="description"
+                        value=&self.description
+                        oninput=self.link.callback(|e: InputData| Msg::UpdateDescription(e.value))
+                        required=true
                     />
                 </div>
                 <div>
-                    <label>{"Humidity:"}</label>
+                    <label for="humidity">{"Humidity:"}</label>
                     <input
                         type="number"
+                        id="humidity"
                         step="0.01"
-                        value=self.item.humidity.to_string()
-                        oninput=self.link.callback(|e: InputData| Msg::UpdateField("humidity".to_owned(), e.value))
+                        value=&self.humidity.to_string()
+                        oninput=self.link.callback(|e: InputData| Msg::UpdateHumidity(e.value))
+                        required=true
                     />
                 </div>
-                // Otros campos del formulario
                 <div>
-                    <button onclick=self.link.callback(|_| Msg::SaveItem)>{"Save"}</button>
+                    <button type="submit">{"Submit"}</button>
                 </div>
             </form>
         }
